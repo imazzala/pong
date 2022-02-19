@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'ball.dart';
 import 'bat.dart';
 
@@ -14,9 +15,12 @@ class Pong extends StatefulWidget {
 class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   late double width;
   late double height;
-  double increment = 3.0;
-  double posx = 0;
-  double posy = 0;
+  int score = 0;
+  double increment = 10.0;
+  double posx = 1;
+  double posy = 1;
+  double randx = 0;
+  double randy = 0;
   double batWidth = 0;
   double batHeight = 0;
   double batPosition = 0;
@@ -41,9 +45,9 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
     animation = Tween(begin: 0, end: 100).animate(controller);
     animation.addListener(() {
-      setState(() {
-        vDir == Direction.down ? posy += 3 : posy -= 3;
-        hDir == Direction.right ? posx += 3 : posx -= 3;
+      safeSetState((){
+        vDir == Direction.down ? posy += ((increment * randy).round()) : posy -= ((increment * randy).round());
+        hDir == Direction.right ? posx += ((increment * randx).round()) : posx -= ((increment * randx).round());
       });
 
       checkBorders();
@@ -64,6 +68,11 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
         return Stack(
           children: [
             Positioned(
+              child: Text("Score: " + score.toString()),
+              top: 10,
+              right: 10,
+            ),
+            Positioned(
               child: Ball(),
               top: posy,
               left: posx,
@@ -82,27 +91,87 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
   }
 
   void moveBat(DragUpdateDetails update){
-    setState(() {
+    safeSetState(() {
       batPosition += update.delta.dx;
     });
   }
 
-
   void checkBorders(){
+    double diameter = 50;
+
     if(posx <= 0 && hDir == Direction.left){
       hDir = Direction.right;
+      randx = randomNumber();
     }
 
-    if(posx >= width && hDir == Direction.right){
+    if(posx >= width - diameter && hDir == Direction.right){
       hDir = Direction.left;
+      randx = randomNumber();
     }
 
     if(posy <= 0 && vDir == Direction.up){
       vDir = Direction.down;
+      randy = randomNumber();
     }
 
-    if(posy >= height && vDir == Direction.down){
-      vDir = Direction.up;
+    if(posy >= height - diameter - batHeight && vDir == Direction.down){
+      if(posx >= (batPosition - diameter - 25) && posx <= (batPosition + batWidth + diameter + 25)){
+        vDir = Direction.up;
+        randy = randomNumber();
+        safeSetState((){
+          score++;
+        });
+      }else{
+        controller.stop();
+        showMessage(context);
+      }
+    }
+  }
+
+  void showMessage(BuildContext context){
+    showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Game Over"),
+            content:const Text("Would you like to play again?"),
+            actions: [
+              TextButton(
+                  onPressed: (){
+                    setState(() {
+                      posx = 0;
+                      posy = 0;
+                      score = 0;
+                    });
+                    Navigator.of(context).pop();
+                    controller.repeat();
+                  },
+                  child: const Text("Yes")),
+              TextButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                    dispose();
+                  },
+                  child: const Text("No"))
+
+            ],
+          );
+        }
+    );
+  }
+
+
+  double randomNumber(){
+    var ran = new Random();
+    double myNum = ran.nextDouble();
+    return myNum + 0.5;
+  }
+
+  void safeSetState(Function function){
+    if(mounted && controller.isAnimating){
+      setState(() {
+        function();
+      });
     }
   }
 
@@ -111,5 +180,4 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
     controller.dispose();
     super.dispose();
   }
-
 }
