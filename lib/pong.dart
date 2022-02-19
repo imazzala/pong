@@ -29,28 +29,24 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-
+    posx = 0;
+    posy = 0;
     width = 0;
     height = 0;
 
     controller = AnimationController(
         vsync: this,
-        duration: const Duration(seconds: 10)
+        duration: const Duration(seconds: 100)
     );
 
     animation = Tween(begin: 0, end: 100).animate(controller);
     animation.addListener(() {
       setState(() {
-        vDir == Direction.down ? posy += increment : posy -= increment;
-        hDir == Direction.right ? posx += increment : posx -= increment;
+        vDir == Direction.down ? posy += 3 : posy -= 3;
+        hDir == Direction.right ? posx += 3 : posx -= 3;
       });
 
       checkBorders();
-      print("width: $width");
-      print("height: $height");
-      print("posy: $posy");
-      print("posx: $posx");
-
     });
     controller.forward();//Iniciar la animación
     super.initState();
@@ -58,8 +54,7 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
+    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints){
 
         height = constraints.maxHeight;
         width = constraints.maxWidth;
@@ -70,8 +65,8 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
           children: [
             Positioned(
               child: Ball(),
-              top: posx,
-              left: posy,
+              top: posy,
+              left: posx,
             ),
             Positioned(
               child: GestureDetector(
@@ -83,32 +78,31 @@ class _PongState extends State<Pong> with SingleTickerProviderStateMixin {
             )
           ],
         );
-      }),
-    );
+      });
   }
 
   void moveBat(DragUpdateDetails update){
     setState(() {
-      batPosition +=  update.delta.dx;
+      batPosition += update.delta.dx;
     });
   }
 
 
   void checkBorders(){
     if(posx <= 0 && hDir == Direction.left){
-      hDir == Direction.right;
+      hDir = Direction.right;
     }
 
     if(posx >= width && hDir == Direction.right){
-      hDir == Direction.left;
+      hDir = Direction.left;
     }
 
     if(posy <= 0 && vDir == Direction.up){
-      vDir == Direction.down;
+      vDir = Direction.down;
     }
 
-    if(posx >= height && vDir == Direction.down){
-      vDir == Direction.up;
+    if(posy >= height && vDir == Direction.down){
+      vDir = Direction.up;
     }
   }
 

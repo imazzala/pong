@@ -17,44 +17,14 @@ class MyApp extends StatelessWidget {
 
         primarySwatch: Colors.orange,
       ),
-      home: const MyHomePage(title: 'Pong'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-            widget.title,
-            style: const TextStyle(color: Colors.white),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Pong"),
         ),
-      ),
-      body: Container(
-        child: const SafeArea(child: Pong()),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        body: const SafeArea(child: Pong()),
+      )
     );
   }
 }
+
+
